@@ -381,4 +381,64 @@ upstream mysvr {
 }
 ```
 
+## Docker + Nginx
+
+### 直接上一个案例
+
+#### 先在宿主机创建一个文件夹，用来存在此次Nginx的一些配置
+
+例如地址为 ：「 /xxy/one」
+
+创建一个nginx.conf文件
+
+创建一个log目录存放nginx的日志
+
+有一个基础的网页项目
+
+#### 新建一个「nginx.conf」
+
+```nginx
+worker_processes 1;
+events {
+    worker_connections 1024;
+}
+ 
+http {
+    include mime.types;
+    default_type application/octet-stream;
+    sendfile on;
+    keepalive_timeout 65;
+ 
+	server {
+        listen       80;
+        server_name  localhost;
+ 
+        location / {
+              root   /usr/xxy/tetris/;
+             index  index.html index.htm;
+        } 
+	}	
+}
+```
+
+#### 进行挂载映射
+
+```shell
+$ docker run \
+--name my_nging \
+-d -p 8080:80 \
+-v xxy/nginx.conf:/etc/nginx/nginx.conf \
+-v xxy/log:/var/log/nginx \
+-v xxy/tetris:/usr/xxy/tetris \
+nginx
+```
+
+> - 第一个-v：挂载nginx的主配置文件，以方便在宿主机上直接修改容器的配置文件
+>
+> - 第二个-v：挂载容器内nginx的日志，容器运行起来之后，可以直接在宿主机的这个目录中查看nginx日志
+>
+> - 第三个-v：挂载静态页面目录
+
+#### 完成
+
 
